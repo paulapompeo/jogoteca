@@ -1,7 +1,7 @@
-from flask import Flask, render_template, request, redirect, session, flash
+from flask import Flask, render_template, request, redirect, session, flash, url_for
 
 app = Flask(__name__)
-app.secret_key = 'teste'  #
+app.secret_key = 'teste'
 
 
 class Jogo:
@@ -24,7 +24,7 @@ def index():
 @app.route('/novo')
 def novo():
     if 'usuario_logado' not in session or session['usuario_logado'] == None:
-        return redirect('/login?proximo=novo')
+        return redirect(url_for('login', proxima=url_for('novo')))
     return render_template('novo.html', titulo='Novo Jogo')
 
 
@@ -36,7 +36,7 @@ def criar():
 
     jogo = Jogo(nome, categoria, console)
     lista.append(jogo)
-    return redirect('/')
+    return redirect(url_for('index'))
 
 
 @app.route('/login')
@@ -51,16 +51,16 @@ def autenticar():
         session['usuario_logado'] = request.form['usuario']
         flash(request.form['usuario'] + ' logou com sucesso!')
         proxima_pagina = request.form['proxima']
-        return redirect('/{}'.format(proxima_pagina))
+        return redirect(proxima_pagina)
     else:
         flash('Não logado, tente novamente')
-        return redirect('/login')
+        return redirect(url_for('login'))
 
 @app.route('/logout')
 def logout():
     session['usuario_logado'] = None
     flash('Nenhum usuário logado!')
-    return redirect('/')
+    return redirect(url_for('index'))
 
 
 app.run(debug=True)  # assim fica no modo de desenvolvimento -> nao é mais necessario reiniciar o servidor
